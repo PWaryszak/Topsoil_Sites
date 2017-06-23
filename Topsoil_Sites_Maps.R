@@ -1,5 +1,5 @@
 #GGMAPS Libraries:===========
-install.packages("ggplot2", "grid", "maptools", "maps", "ggmap" dependencies = TRUE)
+#install.packages("ggplot2", "grid", "maptools", "maps", "ggmap" dependencies = TRUE)
 library(grid)
 library(maptools)
 library(maps)
@@ -12,7 +12,7 @@ library(ggmap)
 #and two topsoil recipient sites at Forrestdale Lake (upper triangle) and Anketell 
 #Road (bottom triangle). Topsoil was collected and transferred in April-May 2012.
 
-#load file with GPS coordinates:
+#load csv file with GPS coordinates:
 sitemap <- read.csv("sitemap.csv")
 str(sitemap)#72 obs. of  10 variables:
 
@@ -51,5 +51,41 @@ transfer3
 
 transfer4<-transfer3 +scale_shape_manual(values=c(21,25,25))+scale_fill_manual(values=c("red", "yellow"))
 transfer4 #Final Map
-
 ggsave(transfer4, file="Topsoil_Sites_Map1.png", width=8, height=4)
+
+
+#MAP 2 My Study Site Location in South-Western Australia ======
+#(Figure 3.3 in Version 23june2017 of my thesis).
+library(grid)
+library(maptools)
+library(maps)
+library(ggplot2)
+library(ggmap)
+
+SiteMapURL<- "https://raw.githubusercontent.com/PWaryszak/Topsoil_Sites/master/sitemap.csv"
+sitemap <- read.csv(SiteMapURL)#reading-in straight from online file.
+str(sitemap)#72 obs. of  10 variables:
+
+MyStudySitesPin<- data.frame(CentralLon = mean(sitemap$lon),
+                             CentralLat = mean(sitemap$lat))
+MyStudySitesPin# Computed the central location for all my 6 sites (12 clusters of plot each)
+#CentralLon CentralLat
+# 115.9184  -32.18693
+
+#maptype can be = "roadmap", "watercolor", "terrain", "satellite", "toner"
+#I chose "toner"
+
+glgmap<-get_map(location = c(lon = MyStudySitesPin[,"CentralLon"], lat = MyStudySitesPin[,"CentralLat"])
+                ,maptype = "toner" , zoom= 7,color = "bw")#getting our map as the canvas 
+MyStudySites <- ggmap(glgmap)#combine google map with ggplot using ggmap function
+MyStudySites #base map
+MyStudySites1<-MyStudySites + geom_point(aes(x = CentralLon, y = CentralLat, fill = "red"),
+                                         size=8, shape = 22, data = MyStudySitesPin) #placing the pin on our map.Play with shapes from 0 to 25.
+MyStudySites2 <- MyStudySites1 + annotate('text', x = 117.8, y=-32.16644, label = "Study Sites",colour = I("red"), size = 10)
+MyStudySites2a<-MyStudySites2 +  ylab("Latitude") + xlab("Longitude")
+MyStudySites3 <- MyStudySites2a +theme( axis.text.x=element_text(size=18), #define your own theme parts
+                      axis.text.y=element_text(size=18),
+                      axis.title.x=element_text(size=20),
+                      axis.title.y=element_text(size=20),
+                      legend.position = "none")
+MyStudySites3
